@@ -1,0 +1,819 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SparklineJS — SVG Sparkline Library Demo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #f8fafc;
+        --card: #ffffff;
+        --border: #e2e8f0;
+        --text: #1e293b;
+        --text-light: #64748b;
+        --text-lighter: #94a3b8;
+        --accent: #4a6fa5;
+        --shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.08);
+        --radius: 12px;
+        --radius-sm: 8px;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family:
+          "Inter",
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        padding: 2rem 1rem;
+        line-height: 1.6;
+      }
+
+      .container {
+        max-width: 1100px;
+        margin: 0 auto;
+      }
+
+      /* ---------- Header ---------- */
+      .header {
+        text-align: center;
+        margin-bottom: 3rem;
+      }
+
+      .header h1 {
+        font-size: 2.5rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+        background: linear-gradient(135deg, #ef4444, #8b5cf6, #3b82f6);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .header p {
+        font-size: 1.1rem;
+        color: var(--text-light);
+      }
+
+      .header .badges {
+        display: flex;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-top: 1rem;
+        flex-wrap: wrap;
+      }
+
+      .badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+      }
+
+      .badge-zero {
+        background: #dbeafe;
+        color: #1d4ed8;
+      }
+
+      .badge-svg {
+        background: #fce7f3;
+        color: #be185d;
+      }
+
+      .badge-mit {
+        background: #d1fae5;
+        color: #047857;
+      }
+
+      /* ---------- Section ---------- */
+      .section {
+        margin-bottom: 3rem;
+      }
+
+      .section-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid var(--border);
+      }
+
+      /* ---------- Card grid ---------- */
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.5rem;
+      }
+
+      .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 1.5rem;
+        box-shadow: var(--shadow);
+        transition:
+          box-shadow 0.2s,
+          transform 0.2s;
+      }
+
+      .card:hover {
+        box-shadow: var(--shadow-lg);
+        transform: translateY(-2px);
+      }
+
+      .card h3 {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--text-light);
+        margin-bottom: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+      }
+
+      .card .chart-box {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 80px;
+        margin-bottom: 0.75rem;
+      }
+
+      .card .chart-box svg {
+        max-width: 100%;
+        height: auto;
+      }
+
+      .card .meta {
+        font-size: 0.75rem;
+        color: var(--text-lighter);
+        font-family: "SF Mono", "Fira Code", monospace;
+      }
+
+      .card .code {
+        margin-top: 0.5rem;
+        font-size: 0.72rem;
+        font-family: "SF Mono", "Fira Code", monospace;
+        color: #475569;
+        background: #f1f5f9;
+        padding: 0.4rem 0.6rem;
+        border-radius: var(--radius-sm);
+        overflow-x: auto;
+        white-space: nowrap;
+      }
+
+      /* ---------- Dashboard mock ---------- */
+      .dashboard {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 2rem;
+        box-shadow: var(--shadow-lg);
+        margin-bottom: 3rem;
+      }
+
+      .dashboard h2 {
+        font-size: 1.1rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .dash-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 1rem;
+      }
+
+      .dash-stat {
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        padding: 1rem;
+      }
+
+      .dash-stat .label {
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--text-lighter);
+        margin-bottom: 0.25rem;
+      }
+
+      .dash-stat .value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+      }
+
+      .dash-stat .trend {
+        font-size: 0.75rem;
+        font-weight: 600;
+      }
+
+      .trend-up {
+        color: #10b981;
+      }
+
+      .trend-down {
+        color: #ef4444;
+      }
+
+      /* ---------- Table ---------- */
+      .table-wrap {
+        overflow-x: auto;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        overflow: hidden;
+      }
+
+      th,
+      td {
+        padding: 0.75rem 1rem;
+        text-align: left;
+        border-bottom: 1px solid var(--border);
+      }
+
+      th {
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--text-light);
+        background: #f8fafc;
+      }
+
+      tbody tr:hover {
+        background: #f8fafc;
+      }
+
+      td .spark-cell {
+        display: flex;
+        align-items: center;
+      }
+
+      /* ---------- Footer ---------- */
+      .footer {
+        text-align: center;
+        padding: 2rem 0;
+        color: var(--text-lighter);
+        font-size: 0.85rem;
+      }
+
+      .footer a {
+        color: var(--accent);
+        text-decoration: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- ========== Header ========== -->
+      <header class="header">
+        <h1>SparklineJS</h1>
+        <p>
+          A lightweight, zero-dependency SVG sparkline and micro-chart library.
+        </p>
+        <div class="badges">
+          <span class="badge badge-zero">Zero Dependencies</span>
+          <span class="badge badge-svg">Pure SVG</span>
+          <span class="badge badge-mit">MIT License</span>
+        </div>
+      </header>
+
+      <!-- ========== Dashboard Mock ========== -->
+      <div class="dashboard">
+        <h2>Real-world Dashboard Example</h2>
+        <div class="dash-grid">
+          <div class="dash-stat">
+            <div class="label">Revenue</div>
+            <div class="value">$48,250</div>
+            <div class="trend trend-up">+12.5% ↑</div>
+            <div id="dash-revenue" style="margin-top: 0.5rem"></div>
+          </div>
+          <div class="dash-stat">
+            <div class="label">Active Users</div>
+            <div class="value">3,847</div>
+            <div class="trend trend-up">+8.2% ↑</div>
+            <div id="dash-users" style="margin-top: 0.5rem"></div>
+          </div>
+          <div class="dash-stat">
+            <div class="label">Conversion</div>
+            <div class="value">4.7%</div>
+            <div class="trend trend-down">-1.3% ↓</div>
+            <div id="dash-conversion" style="margin-top: 0.5rem"></div>
+          </div>
+          <div class="dash-stat">
+            <div class="label">Server Load</div>
+            <div class="value">67%</div>
+            <div class="trend trend-up">+5.0% ↑</div>
+            <div id="dash-server" style="margin-top: 0.5rem"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== Line Charts ========== -->
+      <section class="section">
+        <h2 class="section-title">Line Charts</h2>
+        <div class="grid">
+          <div class="card">
+            <h3>Smooth Line (default)</h3>
+            <div class="chart-box" id="c-line-smooth"></div>
+            <div class="meta">data: [1, 5, 2, 8, 3, 7, 4]</div>
+            <div class="code">Sparkline.line(data, { tooltip: true })</div>
+          </div>
+
+          <div class="card">
+            <h3>Straight Line</h3>
+            <div class="chart-box" id="c-line-straight"></div>
+            <div class="meta">smooth: false, color: #8b5cf6</div>
+            <div class="code">Sparkline.line(data, { smooth: false })</div>
+          </div>
+
+          <div class="card">
+            <h3>Line + All Dots</h3>
+            <div class="chart-box" id="c-line-dots"></div>
+            <div class="meta">showDots: true, color: #f59e0b</div>
+            <div class="code">Sparkline.line(data, { showDots: true })</div>
+          </div>
+
+          <div class="card">
+            <h3>Line + Normal Range</h3>
+            <div class="chart-box" id="c-line-range"></div>
+            <div class="meta">normalRange: [3, 7]</div>
+            <div class="code">Sparkline.line(data, { normalRange: [3,7] })</div>
+          </div>
+
+          <div class="card">
+            <h3>Line + Zero Line</h3>
+            <div class="chart-box" id="c-line-zero"></div>
+            <div class="meta">negative data, zeroLine: true</div>
+            <div class="code">Sparkline.line(data, { zeroLine: true })</div>
+          </div>
+
+          <div class="card">
+            <h3>Custom Size + Color</h3>
+            <div class="chart-box" id="c-line-custom"></div>
+            <div class="meta">width: 280, height: 80, color: #06b6d4</div>
+            <div class="code">
+              Sparkline.line(data, { width: 280, height: 80 })
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== Area Charts ========== -->
+      <section class="section">
+        <h2 class="section-title">Area Charts</h2>
+        <div class="grid">
+          <div class="card">
+            <h3>Area (blue)</h3>
+            <div class="chart-box" id="c-area-blue"></div>
+            <div class="meta">color: #3b82f6, fillOpacity: 0.2</div>
+            <div class="code">Sparkline.area(data, { color: "#3b82f6" })</div>
+          </div>
+
+          <div class="card">
+            <h3>Area (green)</h3>
+            <div class="chart-box" id="c-area-green"></div>
+            <div class="meta">color: #10b981, fillOpacity: 0.25</div>
+            <div class="code">Sparkline.area(data, { fillOpacity: 0.25 })</div>
+          </div>
+
+          <div class="card">
+            <h3>Area + Tooltip</h3>
+            <div class="chart-box" id="c-area-tooltip"></div>
+            <div class="meta">tooltip: true, color: #ec4899</div>
+            <div class="code">Sparkline.area(data, { tooltip: true })</div>
+          </div>
+
+          <div class="card">
+            <h3>Area Straight</h3>
+            <div class="chart-box" id="c-area-straight"></div>
+            <div class="meta">smooth: false, color: #f97316</div>
+            <div class="code">Sparkline.area(data, { smooth: false })</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== Bar Charts ========== -->
+      <section class="section">
+        <h2 class="section-title">Bar Charts</h2>
+        <div class="grid">
+          <div class="card">
+            <h3>Bar (green)</h3>
+            <div class="chart-box" id="c-bar-green"></div>
+            <div class="meta">color: #10b981, tooltip: true</div>
+            <div class="code">Sparkline.bar(data, { tooltip: true })</div>
+          </div>
+
+          <div class="card">
+            <h3>Bar (red)</h3>
+            <div class="chart-box" id="c-bar-red"></div>
+            <div class="meta">color: #ef4444</div>
+            <div class="code">Sparkline.bar(data, { color: "#ef4444" })</div>
+          </div>
+
+          <div class="card">
+            <h3>Tristate</h3>
+            <div class="chart-box" id="c-tristate"></div>
+            <div class="meta">positive/negative/zero bars</div>
+            <div class="code">Sparkline.tristate(data)</div>
+          </div>
+
+          <div class="card">
+            <h3>Tristate + Tooltip</h3>
+            <div class="chart-box" id="c-tristate-tooltip"></div>
+            <div class="meta">tooltip: true</div>
+            <div class="code">Sparkline.tristate(data, { tooltip: true })</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== Pie & Bullet ========== -->
+      <section class="section">
+        <h2 class="section-title">Pie & Bullet Charts</h2>
+        <div class="grid">
+          <div class="card">
+            <h3>Pie</h3>
+            <div class="chart-box" id="c-pie"></div>
+            <div class="meta">data: [30, 20, 15, 25, 10]</div>
+            <div class="code">Sparkline.pie(data, { tooltip: true })</div>
+          </div>
+
+          <div class="card">
+            <h3>Donut</h3>
+            <div class="chart-box" id="c-donut"></div>
+            <div class="meta">donut: true</div>
+            <div class="code">Sparkline.pie(data, { donut: true })</div>
+          </div>
+
+          <div class="card">
+            <h3>Pie Custom Colors</h3>
+            <div class="chart-box" id="c-pie-colors"></div>
+            <div class="meta">custom color palette</div>
+            <div class="code">Sparkline.pie(data, { colors: [...] })</div>
+          </div>
+
+          <div class="card">
+            <h3>Bullet — Sales vs Target</h3>
+            <div class="chart-box" id="c-bullet"></div>
+            <div class="meta">value: 65, target: 80, max: 100</div>
+            <div class="code">Sparkline.bullet(65, 80, 100)</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== Multi-Series ========== -->
+      <section class="section">
+        <h2 class="section-title">Multi-Series</h2>
+        <div class="grid">
+          <div class="card">
+            <h3>3 Series Overlay</h3>
+            <div class="chart-box" id="c-multi"></div>
+            <div class="meta">3 overlaid line series</div>
+            <div class="code">Sparkline.multiLine(series, null, opts)</div>
+          </div>
+
+          <div class="card">
+            <h3>2 Series — Custom Colors</h3>
+            <div class="chart-box" id="c-multi-2"></div>
+            <div class="meta">per-series color overrides</div>
+            <div class="code">Sparkline.multiLine(data, seriesOpts)</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== Table with Sparklines ========== -->
+      <section class="section">
+        <h2 class="section-title">Sparklines in a Table</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Metric</th>
+                <th>Current</th>
+                <th>Change</th>
+                <th>Trend (7 days)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Page Views</td>
+                <td>12,450</td>
+                <td class="trend trend-up">+15.2%</td>
+                <td class="spark-cell" id="t-views"></td>
+              </tr>
+              <tr>
+                <td>Bounce Rate</td>
+                <td>42.3%</td>
+                <td class="trend trend-down">-3.1%</td>
+                <td class="spark-cell" id="t-bounce"></td>
+              </tr>
+              <tr>
+                <td>Avg. Session</td>
+                <td>4m 32s</td>
+                <td class="trend trend-up">+8.7%</td>
+                <td class="spark-cell" id="t-session"></td>
+              </tr>
+              <tr>
+                <td>Sign-ups</td>
+                <td>287</td>
+                <td class="trend trend-up">+22.4%</td>
+                <td class="spark-cell" id="t-signups"></td>
+              </tr>
+              <tr>
+                <td>Revenue</td>
+                <td>$8,420</td>
+                <td class="trend trend-down">-2.8%</td>
+                <td class="spark-cell" id="t-revenue"></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ========== Footer ========== -->
+      <footer class="footer">
+        <p>
+          SparklineJS v1.0.0 —
+          <a href="sparkline.js">View source</a> — MIT License
+        </p>
+      </footer>
+    </div>
+
+    <!-- ========== Library ========== -->
+    <script src="sparkline.js"></script>
+
+    <!-- ========== Demo Script ========== -->
+    <script>
+      (function () {
+        "use strict";
+
+        // ---- Sample data sets ----
+        var dataA = [1, 5, 2, 8, 3, 7, 4];
+        var dataB = [3, 6, 2, 9, 5, 7, 4, 8];
+        var dataC = [1, 3, 2, 5, 4, 8, 6, 7, 5];
+        var dataNeg = [-3, 2, -1, 4, -2, 3, -5, 1, -2];
+        var dataTri = [3, -2, 0, 5, -4, 2, -1, 3, -3, 1];
+        var pieData = [30, 20, 15, 25, 10];
+        var multi3 = [
+          [1, 4, 2, 6, 3, 5, 4, 7, 5],
+          [3, 1, 5, 2, 6, 3, 7, 4, 6],
+          [2, 3, 1, 4, 2, 5, 3, 6, 4],
+        ];
+        var multi2 = [
+          [5, 3, 6, 4, 7, 5, 8, 6, 9],
+          [2, 4, 1, 3, 2, 5, 3, 4, 6],
+        ];
+
+        // Helper
+        function render(id, svg) {
+          var el = document.getElementById(id);
+          if (el) el.innerHTML = svg;
+        }
+
+        // ---- Dashboard mock ----
+        render(
+          "dash-revenue",
+          Sparkline.area([20, 25, 22, 30, 28, 35, 40, 38, 45], {
+            color: "#10b981",
+            fillOpacity: 0.2,
+            width: 180,
+            height: 40,
+            showMinMax: false,
+          }),
+        );
+        render(
+          "dash-users",
+          Sparkline.line([100, 120, 115, 140, 135, 160, 180], {
+            color: "#3b82f6",
+            width: 180,
+            height: 40,
+            showMinMax: false,
+          }),
+        );
+        render(
+          "dash-conversion",
+          Sparkline.line([5.2, 5.0, 4.8, 4.9, 4.7, 4.6, 4.7], {
+            color: "#ef4444",
+            width: 180,
+            height: 40,
+            showMinMax: false,
+          }),
+        );
+        render(
+          "dash-server",
+          Sparkline.bar([45, 52, 48, 60, 55, 67, 62, 70, 67], {
+            color: "#f59e0b",
+            width: 180,
+            height: 40,
+            showMinMax: false,
+          }),
+        );
+
+        // ---- Line charts ----
+        render("c-line-smooth", Sparkline.line(dataA, { tooltip: true }));
+        render(
+          "c-line-straight",
+          Sparkline.line(dataA, { smooth: false, color: "#8b5cf6" }),
+        );
+        render(
+          "c-line-dots",
+          Sparkline.line(dataA, {
+            showDots: true,
+            tooltip: true,
+            color: "#f59e0b",
+          }),
+        );
+        render(
+          "c-line-range",
+          Sparkline.line(dataA, {
+            color: "#06b6d4",
+            normalRange: [3, 7],
+            normalRangeColor: "#e0f2fe",
+          }),
+        );
+        render(
+          "c-line-zero",
+          Sparkline.line(dataNeg, {
+            color: "#ec4899",
+            zeroLine: true,
+            tooltip: true,
+          }),
+        );
+        render(
+          "c-line-custom",
+          Sparkline.line(dataC, {
+            width: 280,
+            height: 80,
+            color: "#06b6d4",
+            strokeWidth: 4,
+          }),
+        );
+
+        // ---- Area charts ----
+        render(
+          "c-area-blue",
+          Sparkline.area(dataC, { color: "#3b82f6", fillOpacity: 0.2 }),
+        );
+        render(
+          "c-area-green",
+          Sparkline.area(dataC, {
+            color: "#10b981",
+            fillOpacity: 0.25,
+          }),
+        );
+        render(
+          "c-area-tooltip",
+          Sparkline.area(dataC, { color: "#ec4899", tooltip: true }),
+        );
+        render(
+          "c-area-straight",
+          Sparkline.area(dataC, {
+            color: "#f97316",
+            smooth: false,
+            fillOpacity: 0.2,
+          }),
+        );
+
+        // ---- Bar charts ----
+        render(
+          "c-bar-green",
+          Sparkline.bar(dataB, { color: "#10b981", tooltip: true }),
+        );
+        render("c-bar-red", Sparkline.bar(dataB, { color: "#ef4444" }));
+        render(
+          "c-tristate",
+          Sparkline.tristate(dataTri, {
+            color: "#10b981",
+            negColor: "#ef4444",
+            zeroColor: "#9ca3af",
+          }),
+        );
+        render(
+          "c-tristate-tooltip",
+          Sparkline.tristate(dataTri, {
+            color: "#10b981",
+            negColor: "#ef4444",
+            tooltip: true,
+          }),
+        );
+
+        // ---- Pie & Bullet ----
+        render(
+          "c-pie",
+          Sparkline.pie(pieData, {
+            width: 120,
+            height: 120,
+            tooltip: true,
+          }),
+        );
+        render(
+          "c-donut",
+          Sparkline.pie(pieData, {
+            width: 120,
+            height: 120,
+            donut: true,
+            tooltip: true,
+          }),
+        );
+        render(
+          "c-pie-colors",
+          Sparkline.pie(pieData, {
+            width: 120,
+            height: 120,
+            tooltip: true,
+            colors: ["#ef4444", "#f59e0b", "#10b981", "#3b82f6", "#8b5cf6"],
+          }),
+        );
+        render("c-bullet", Sparkline.bullet(65, 80, 100, { color: "#3b82f6" }));
+
+        // ---- Multi-series ----
+        render(
+          "c-multi",
+          Sparkline.multiLine(multi3, null, {
+            width: 280,
+            height: 80,
+          }),
+        );
+        render(
+          "c-multi-2",
+          Sparkline.multiLine(
+            multi2,
+            [{ color: "#3b82f6" }, { color: "#ef4444" }],
+            {
+              width: 280,
+              height: 80,
+            },
+          ),
+        );
+
+        // ---- Table sparklines ----
+        render(
+          "t-views",
+          Sparkline.line([8, 10, 9, 12, 11, 14, 16], {
+            color: "#10b981",
+            width: 140,
+            height: 30,
+            showMinMax: false,
+          }),
+        );
+        render(
+          "t-bounce",
+          Sparkline.line([48, 47, 45, 46, 44, 43, 42], {
+            color: "#ef4444",
+            width: 140,
+            height: 30,
+            showMinMax: false,
+          }),
+        );
+        render(
+          "t-session",
+          Sparkline.area([3.5, 3.8, 3.6, 4.0, 4.2, 4.3, 4.5], {
+            color: "#3b82f6",
+            width: 140,
+            height: 30,
+            showMinMax: false,
+            fillOpacity: 0.2,
+          }),
+        );
+        render(
+          "t-signups",
+          Sparkline.bar([180, 200, 195, 220, 240, 260, 287], {
+            color: "#10b981",
+            width: 140,
+            height: 30,
+            showMinMax: false,
+          }),
+        );
+        render(
+          "t-revenue",
+          Sparkline.line([92, 88, 90, 85, 87, 84, 82], {
+            color: "#ef4444",
+            width: 140,
+            height: 30,
+            showMinMax: false,
+          }),
+        );
+      })();
+    </script>
+  </body>
+</html>
