@@ -376,6 +376,15 @@
               Sparkline.line(data, { width: 280, height: 80 })
             </div>
           </div>
+
+          <div class="card">
+            <h3>Multi-Color Line</h3>
+            <div class="chart-box" id="c-line-multi-color"></div>
+            <div class="meta">
+              colors: ["#ef4444", "#f59e0b", "#10b981", "#3b82f6"]
+            </div>
+            <div class="code">Sparkline.line(data, { colors: [...] })</div>
+          </div>
         </div>
       </section>
 
@@ -410,6 +419,13 @@
             <div class="meta">smooth: false, color: #f97316</div>
             <div class="code">Sparkline.area(data, { smooth: false })</div>
           </div>
+
+          <div class="card">
+            <h3>Multi-Color Area</h3>
+            <div class="chart-box" id="c-area-multi-color"></div>
+            <div class="meta">gradient fill from colors array</div>
+            <div class="code">Sparkline.area(data, { colors: [...] })</div>
+          </div>
         </div>
       </section>
 
@@ -443,6 +459,15 @@
             <div class="chart-box" id="c-tristate-tooltip"></div>
             <div class="meta">tooltip: true</div>
             <div class="code">Sparkline.tristate(data, { tooltip: true })</div>
+          </div>
+
+          <div class="card">
+            <h3>Multi-Color Bar</h3>
+            <div class="chart-box" id="c-bar-multi-color"></div>
+            <div class="meta">
+              colors: ["#ef4444", "#f59e0b", "#10b981", "#3b82f6", "#8b5cf6"]
+            </div>
+            <div class="code">Sparkline.bar(data, { colors: [...] })</div>
           </div>
         </div>
       </section>
@@ -668,6 +693,15 @@
             strokeWidth: 4,
           }),
         );
+        render(
+          "c-line-multi-color",
+          Sparkline.line(dataA, {
+            width: 280,
+            height: 60,
+            colors: ["#ef4444", "#f59e0b", "#10b981", "#3b82f6"],
+            showMinMax: false,
+          }),
+        );
 
         // ---- Area charts ----
         render(
@@ -693,6 +727,16 @@
             fillOpacity: 0.2,
           }),
         );
+        render(
+          "c-area-multi-color",
+          Sparkline.area(dataC, {
+            width: 280,
+            height: 60,
+            colors: ["#ef4444", "#f59e0b", "#10b981", "#3b82f6"],
+            fillOpacity: 0.3,
+            showMinMax: false,
+          }),
+        );
 
         // ---- Bar charts ----
         render(
@@ -713,6 +757,13 @@
           Sparkline.tristate(dataTri, {
             color: "#10b981",
             negColor: "#ef4444",
+            tooltip: true,
+          }),
+        );
+        render(
+          "c-bar-multi-color",
+          Sparkline.bar(dataB, {
+            colors: ["#ef4444", "#f59e0b", "#10b981", "#3b82f6", "#8b5cf6"],
             tooltip: true,
           }),
         );

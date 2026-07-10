@@ -58,7 +58,7 @@
     donut: false, // for pie charts
     negColor: "#ef4444", // for tristate charts
     zeroColor: "#9ca3af", // for tristate charts
-    colors: null, // palette array for pie / multi charts
+    colors: null, // palette array for pie / multi / bar / line / area charts
   };
 
   var PALETTE = [
@@ -239,6 +239,8 @@
      4. Chart types
      ============================================================ */
 
+  var _gradientId = 0; // unique counter for SVG gradient element IDs
+
   /* ---------- LINE ---------- */
 
   /**
@@ -313,16 +315,43 @@
     var tooltipTag = opts.tooltip
       ? "<title>" + escapeXml(data.join(", ")) + "</title>"
       : "";
-    inner +=
-      '<path d="' +
-      d +
-      '" fill="none" stroke="' +
-      color +
-      '" stroke-width="' +
-      strokeWidth +
-      '" stroke-linecap="round" stroke-linejoin="round">' +
-      tooltipTag +
-      "</path>";
+
+    if (opts.colors && opts.colors.length > 0) {
+      // Multi-color line: render per-segment straight lines, each with its own colour
+      for (var si = 0; si < points.length - 1; si++) {
+        var segColor = opts.colors[si % opts.colors.length];
+        var segTooltip = opts.tooltip
+          ? "<title>" + escapeXml("Value: " + points[si + 1].value) + "</title>"
+          : "";
+        inner +=
+          '<line x1="' +
+          points[si].x +
+          '" y1="' +
+          points[si].y +
+          '" x2="' +
+          points[si + 1].x +
+          '" y2="' +
+          points[si + 1].y +
+          '" stroke="' +
+          segColor +
+          '" stroke-width="' +
+          strokeWidth +
+          '" stroke-linecap="round" stroke-linejoin="round">' +
+          segTooltip +
+          "</line>";
+      }
+    } else {
+      inner +=
+        '<path d="' +
+        d +
+        '" fill="none" stroke="' +
+        color +
+        '" stroke-width="' +
+        strokeWidth +
+        '" stroke-linecap="round" stroke-linejoin="round">' +
+        tooltipTag +
+        "</path>";
+    }
 
     // Min / max dots
     if (opts.showMinMax) {
@@ -416,25 +445,75 @@
 
     var inner = "";
 
-    // Filled area
-    inner +=
-      '<path d="' +
-      areaD +
-      '" fill="' +
-      fillColor +
-      '" fill-opacity="' +
-      opts.fillOpacity +
-      '"/>';
+    if (opts.colors && opts.colors.length > 0) {
+      // Multi-color area: gradient fill + per-segment stroke
+      var gradId = "spark-grad-" + ++_gradientId;
+      var stops = "";
+      var nColors = opts.colors.length;
+      for (var ci = 0; ci < nColors; ci++) {
+        var offset = nColors === 1 ? 0 : (ci / (nColors - 1)) * 100;
+        stops +=
+          '<stop offset="' +
+          round2(offset) +
+          '%" stop-color="' +
+          opts.colors[ci] +
+          '"/>';
+      }
+      inner +=
+        '<defs><linearGradient id="' +
+        gradId +
+        '" x1="0%" y1="0%" x2="100%" y2="0%">' +
+        stops +
+        "</linearGradient></defs>";
 
-    // Line stroke on top
-    inner +=
-      '<path d="' +
-      d +
-      '" fill="none" stroke="' +
-      color +
-      '" stroke-width="' +
-      opts.strokeWidth +
-      '" stroke-linecap="round" stroke-linejoin="round"/>';
+      // Filled area with gradient
+      inner +=
+        '<path d="' +
+        areaD +
+        '" fill="url(#' +
+        gradId +
+        ')" fill-opacity="' +
+        opts.fillOpacity +
+        '"/>';
+
+      // Per-segment stroke on top
+      for (var ai = 0; ai < points.length - 1; ai++) {
+        inner +=
+          '<line x1="' +
+          points[ai].x +
+          '" y1="' +
+          points[ai].y +
+          '" x2="' +
+          points[ai + 1].x +
+          '" y2="' +
+          points[ai + 1].y +
+          '" stroke="' +
+          opts.colors[ai % nColors] +
+          '" stroke-width="' +
+          opts.strokeWidth +
+          '" stroke-linecap="round" stroke-linejoin="round"/>';
+      }
+    } else {
+      // Filled area
+      inner +=
+        '<path d="' +
+        areaD +
+        '" fill="' +
+        fillColor +
+        '" fill-opacity="' +
+        opts.fillOpacity +
+        '"/>';
+
+      // Line stroke on top
+      inner +=
+        '<path d="' +
+        d +
+        '" fill="none" stroke="' +
+        color +
+        '" stroke-width="' +
+        opts.strokeWidth +
+        '" stroke-linecap="round" stroke-linejoin="round"/>';
+    }
 
     // Min / max dots
     if (opts.showMinMax) {
@@ -517,6 +596,8 @@
       var barH = ((data[i] - ext.min) / range) * (height - padding * 2);
       var x = padding + i * slot + (slot - barWidth) / 2;
       var y = baseline - barH;
+      var barColor =
+        (opts.colors && opts.colors[i % opts.colors.length]) || color;
       var titleTag = opts.tooltip
         ? "<title>" + escapeXml(String(data[i])) + "</title>"
         : "";
@@ -530,7 +611,7 @@
         '" height="' +
         round2(barH) +
         '" fill="' +
-        color +
+        barColor +
         '" rx="1">' +
         titleTag +
         "</rect>";
